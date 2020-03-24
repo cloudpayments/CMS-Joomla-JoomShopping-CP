@@ -1,7 +1,5 @@
 <?php
 
-  //$text = JHtml::_('content.onAfterChangeOrderStatus', $text);
-  //print_r($text);die();
   /**
    * @version      4.13.0 05.11.2013
    * @author       MAXXmarketing GmbH
@@ -16,243 +14,225 @@
 
     function showEndForm($params, $order)
     {
-      //self::pre($params);
-      $params['PAYMENT_ID'] = $order->order_id;
-      $params['PAYMENT_BUYER_EMAIL'] = $order->email;
-      $params['PAYMENT_BUYER_PHONE'] = $order->phone;
-      $order->order_total = self::fixOrderTotal($order);
-      $params['sum'] = $order->order_total;
-/*      $data = '';
-      $rescode = '1122233344455566677';
-      $status_id = 5;
-     // $order->saveTransactionData($rescode, $status_id, $data);
-     // $order->saveOrderHistory('kkk', 'jjj');
-      echo '111';
-      die();*/
-    //  $pm_method = self::getPmMethod();
-      // self::pre($order);
-      // die();
+        $params['PAYMENT_ID'] = $order->order_id;
+        $params['PAYMENT_BUYER_EMAIL'] = $order->email;
+        $params['PAYMENT_BUYER_PHONE'] = $order->phone;
+        $order->order_total = self::fixOrderTotal($order);
+        $params['sum'] = $order->order_total;
 
-      if (!empty($params['checksend'])):
-        $OrderItems = self::getOrderItems($order->order_id);
-        if ($OrderItems && count($OrderItems) > 0):
+        if (!empty($params['checksend'])):
+            $OrderItems = self::getOrderItems($order->order_id);
+            if ($OrderItems && count($OrderItems) > 0):
 
-          foreach ($OrderItems as $item):
-            $items[] = array(
-              'label' => iconv("utf-8","cp1251",$item['product_name']),
-              'price' => number_format($item['product_item_price'], 2, ".", ''),
-              'quantity' => $item['product_quantity'],
-              'amount' => number_format(floatval($item['product_item_price'] * $item['product_quantity']), 2, ".", ''),
-              'vat' => $params['nds_product'],
-            );
-          endforeach;
+                $order_discount = 0;
+                foreach ($OrderItems as $item):
+                    if ($order_discount == 0 && number_format(floatval($item['product_item_price'] * $item['product_quantity']), 2, ".", '') > $order->order_discount && $order->order_discount > 0) {
+                        $amount = number_format(floatval($item['product_item_price'] * $item['product_quantity']), 2, ".", '') - $order->order_discount;
+                        $order_discount = $order->order_discount;
+                    }
+                    else {
+                        $amount = number_format(floatval($item['product_item_price'] * $item['product_quantity']), 2, ".", '');
+                    }
+                    $items[] = array(
+                        //'label' => iconv("utf-8","cp1251",$item['product_name']),
+                        'label' => $item['product_name'],
+                        'price' => number_format($item['product_item_price'], 2, ".", ''),
+                        'quantity' => $item['product_quantity'],
+                        'amount' => $amount,
+                        'vat' => $params['nds_product'],
+                        'method'   => (int)$params['kassa_method'],
+                        'object'   => (int)$params['kassa_object'],
+                    );
+                endforeach;
 
-          if ($order->order_shipping && $order->order_shipping > 0):
-            $items[] = array(
-              'label' => "Доставка",
-              'price' => number_format($order->order_shipping, 2, ".", ''),
-              'quantity' => 1,
-              'amount' => number_format($order->order_shipping, 2, ".", ''),
-              'vat' => $params['nds_delivery'],
-            );
-          endif;
+                if ($order->order_shipping && $order->order_shipping > 0):
+                    $items[] = array(
+                        //'label' => iconv("utf-8","cp1251","Р”РѕСЃС‚Р°РІРєР°"),
+                        'label' => "Р”РѕСЃС‚Р°РІРєР°",
+                        'price' => number_format($order->order_shipping, 2, ".", ''),
+                        'quantity' => 1,
+                        'amount' => number_format($order->order_shipping, 2, ".", ''),
+                        'vat' => $params['nds_delivery'],
+                        'method'   => (int)$params['kassa_method'],
+                        'object'   => 4,
+                    );
+                endif;
 
-          if ($order->order_payment && $order->order_payment > 0):
-            $items[] = array(
-              'label' => "Стоимость способа оплаты",
-              'price' => number_format($order->order_payment, 2, ".", ''),
-              'quantity' => 1,
-              'amount' => number_format($order->order_payment, 2, ".", ''),
-              'vat' => $params['nds_product'],
-            );
-          endif;
+                if ($order->order_payment && $order->order_payment > 0):
+                    $items[] = array(
+                        //'label' => iconv("utf-8","cp1251","РЎС‚РѕРёРјРѕСЃС‚СЊ СЃРїРѕСЃРѕР±Р° РѕРїР»Р°С‚С‹"),
+                        'label' => "РЎС‚РѕРёРјРѕСЃС‚СЊ СЃРїРѕСЃРѕР±Р° РѕРїР»Р°С‚С‹",
+                        'price' => number_format($order->order_payment, 2, ".", ''),
+                        'quantity' => 1,
+                        'amount' => number_format($order->order_payment, 2, ".", ''),
+                        'vat' => $params['nds_product'],
+                        'method'   => (int)$params['kassa_method'],
+                        'object'   => 4,
+                    );
+                endif;
 
-          if ($order->order_package && $order->order_package > 0):
-            $items[] = array(
-              'label' => "Стоимость упаковки",
-              'price' => number_format($order->order_package, 2, ".", ''),
-              'quantity' => 1,
-              'amount' => number_format($order->order_package, 2, ".", ''),
-              'vat' => $params['nds_product'],
-            );
-          endif;
+                if ($order->order_package && $order->order_package > 0):
+                    $items[] = array(
+                        //'label' => iconv("utf-8","cp1251","РЎС‚РѕРёРјРѕСЃС‚СЊ СѓРїР°РєРѕРІРєРё"),
+                        'label' => "РЎС‚РѕРёРјРѕСЃС‚СЊ СѓРїР°РєРѕРІРєРё",
+                        'price' => number_format($order->order_package, 2, ".", ''),
+                        'quantity' => 1,
+                        'amount' => number_format($order->order_package, 2, ".", ''),
+                        'vat' => $params['nds_product'],
+                        'method'   => (int)$params['kassa_method'],
+                        'object'   => (int)$params['kassa_object'],
+                    );
+                endif;
 
-     //     $data['PAY_SYSTEM_ID'] = $pm_method->payment_id;
-          $data['cloudPayments']['customerReceipt']['Items'] = $items;
-          $data['cloudPayments']['customerReceipt']['taxationSystem'] = $params['TYPE_NALOG'];
-          $data['cloudPayments']['customerReceipt']['email'] = $params['PAYMENT_BUYER_EMAIL'];
-          $data['cloudPayments']['customerReceipt']['phone'] = $params['PAYMENT_BUYER_PHONE'];
+                $data['cloudPayments']['customerReceipt']['Items'] = $items;
+                $data['cloudPayments']['customerReceipt']['taxationSystem'] = $params['TYPE_NALOG'];
+                $data['cloudPayments']['customerReceipt']['calculationPlace'] = $params['calculationPlace'];
+                $data['cloudPayments']['customerReceipt']['email'] = $params['PAYMENT_BUYER_EMAIL'];
+                $data['cloudPayments']['customerReceipt']['phone'] = $params['PAYMENT_BUYER_PHONE'];
+                $data['cloudPayments']['customerReceipt']['amounts']['electronic'] = number_format($params['sum'], 2, '.', '');
+            endif;
         endif;
-      endif;
-$descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . " от " . date("d-m-y h:i:s");
+        
+        //$descr = iconv("utf-8","cp1251","Р·Р°РєР°Р· в„– " . $params['PAYMENT_ID'] . " РЅР° " . $_SERVER["HTTP_HOST"] . " РѕС‚ " . date("d-m-y h:i:s"));
+        $descr = "Р·Р°РєР°Р· в„– " . $params['PAYMENT_ID'] . " РЅР° " . $_SERVER["HTTP_HOST"] . " РѕС‚ " . date("d-m-y h:i:s");
 
-      $output = '<script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>    
-                <script src="https://widget.cloudpayments.ru/bundles/cloudpayments"></script>
-                <button class="cloudpay_button" id="payButton">Оплатить</button>
+        $output = '<script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>    
+                <script src="https://widget.cloudpayments.ru/bundles/cloudpayments?cms=Joomshoping"></script>
+                <button class="cloudpay_button" id="payButton">Pay</button>
                 <div id="result" style="display:none"></div>
                 <script type="text/javascript">
                     var payHandler = function () {
                         var widget = new cp.CloudPayments({' . "language:'" . $params['lang_widget'] . "'});
-                        widget.charge({ // options
+                        widget.".$params['payment_scheme']."({ // options
                                 publicId: '" . trim($params["publicId"]) . "',
                                 description: '".$descr."', 
                                 amount: " . number_format($params['sum'], 2, '.', '') . ",
                                 currency: '" . $params['PAYMENT_CURRENCY'] . "',
+                                skin: '" . $params['skin_widget']."',
                                 email: '" . $params['PAYMENT_BUYER_EMAIL'] . "',
                                 invoiceId: '" . $params["PAYMENT_ID"] . "',
                                 accountId: '',";
-      if (!empty($params['checksend'])):
-        $output .= "data: " . self::cur_json_encode($data) . ",";
-      endif;
+        if (!empty($params['checksend'])):
+            $output .= "data: " . self::cur_json_encode($data) . ",";
+        endif;
 
-      $output .= "
+        $output .= "
                     },
                     function (options) { ";
-      $output .= '
+        $output .= '
                     window.location.href="/index.php?option=com_jshopping&controller=checkout&task=step7&act=return&js_paymentclass=pm_cloudpayments_cp&InvoiceId='.$params["PAYMENT_ID"].'";';
-      $output .= '
+        $output .= '
                     },
                     function (reason, options) { ';
-      $output .= '
+        $output .= '
                       window.location.href="/index.php?option=com_jshopping&controller=checkout&task=step7&act=cancel&js_paymentclass=pm_cloudpayments_cp&InvoiceId='.$params["PAYMENT_ID"].'"';
-      $output .= '
+        $output .= '
                      });
                      };
                      $("#payButton").on("click", payHandler); 
                      $("#payButton").trigger("click");
                      </script>';
-      echo $output;
-      die();
-    }//ok
+        echo $output;
+        die();
+    }
 
     function showPaymentForm($params, $pmconfigs)
     {
-      include(dirname(__FILE__) . "/paymentform.php");
-    }//ok
+        include(dirname(__FILE__) . "/paymentform.php");
+    }
 
     function loadLanguageFile()
     {
-      $lang = JFactory::getLanguage();
-      $lang_tag = $lang->getTag();
-      $lang_dir = JPATH_ROOT . '/components/com_jshopping/payments/pm_cloudpayments_cp/lang/';
-      $lang_file = $lang_dir . $lang_tag . '.php';
-      if (file_exists($lang_file))
-        require_once $lang_file;
-      else
-        require_once $lang_dir . 'en-GB.php';
-    }///ok
+        $lang = JFactory::getLanguage();
+        $lang_tag = $lang->getTag();
+        $lang_dir = JPATH_ROOT . '/components/com_jshopping/payments/pm_cloudpayments_cp/lang/';
+        $lang_file = $lang_dir . $lang_tag . '.php';
+        if (file_exists($lang_file)) require_once $lang_file;
+        else require_once $lang_dir . 'en-GB.php';
+    }
 
     //function call in admin
     function showAdminFormParams($params)
-    {
-      $array_params = array('testmode', 'email_received', 'transaction_end_status', 'transaction_pending_status', 'transaction_failed_status');
-      foreach ($array_params as $key) {
-        if (!isset($params[$key]))
-          $params[$key] = '';
-      }
-      if (!isset($params['use_ssl']))
-        $params['use_ssl'] = 0;
-      if (!isset($params['address_override']))
-        $params['address_override'] = 0;
+    {   
+        if (isset($params[$key])) {
+            $array_params = array('testmode', 'email_received', 'transaction_end_status', 'transaction_pending_status', 'transaction_failed_status');
+            foreach ($array_params as $key) {
+                if (!isset($params[$key]))
+                    $params[$key] = '';
+            }
+            if (!isset($params['use_ssl'])) $params['use_ssl'] = 0;
+            if (!isset($params['address_override'])) $params['address_override'] = 0;
+        }
+        $ssl_options = array();
+        $ssl_options[] = JHTML::_('select.option', 4, 'TLSv1_0', 'id', 'name');
+        $ssl_options[] = JHTML::_('select.option', 5, 'TLSv1_1', 'id', 'name');
+        $ssl_options[] = JHTML::_('select.option', 6, 'TLSv1_2', 'id', 'name');
 
-      $ssl_options = array();
-      $ssl_options[] = JHTML::_('select.option', 4, 'TLSv1_0', 'id', 'name');
-      $ssl_options[] = JHTML::_('select.option', 5, 'TLSv1_1', 'id', 'name');
-      $ssl_options[] = JHTML::_('select.option', 6, 'TLSv1_2', 'id', 'name');
-
-
-      //$lang_list[] = JHTML::_("select.genericlist", $params, $value, $text, $attribs);
-
-      $orders = JSFactory::getModel('orders', 'JshoppingModel'); //admin model
-      self::loadLanguageFile();
-      include(dirname(__FILE__) . "/adminparamsform.php");
-    }///ok
+        $orders = JSFactory::getModel('orders', 'JshoppingModel'); //admin model
+        self::loadLanguageFile();
+        include(dirname(__FILE__) . "/adminparamsform.php");
+    }
 
     function getUrlParams($pmconfigs)
     {
-      $params = array();
-      self::addError("getUrlParams");
-      //self::addError($_REQUEST);
+        $params = array();
+        $data['order_id'] = $_REQUEST['InvoiceId'];
+        $data['status'] = 5;
+        $data['status_id'] = '';
+        $data['sendmessage'] = 0;
+        $data['notify'] = 0;
+        $data['comments'] = '';
+        $data['include'] = '';
+        $data['view_order'] = 0;
 
-
-     // self::finish($_REQUEST);
-      $data['order_id'] = $_REQUEST['InvoiceId'];
-      $data['status'] = 5;
-      $data['status_id'] = '';
-      $data['sendmessage'] = 0;
-      $data['notify'] = 0;
-      $data['comments'] = '';
-      $data['include'] = '';
-      $data['view_order'] = 0;
-   //   self::updateStatus($data);
-
-
-      $params['order_id'] = $_REQUEST['InvoiceId'];
-      $params['hash'] = "";
-      $params['checkHash'] = 0;
-      $params['checkReturnParams'] = 1;
-      return $params;
-    }///ok
+        $params['order_id'] = $_REQUEST['InvoiceId'];
+        $params['hash'] = "";
+        $params['checkHash'] = 0;
+        $params['checkReturnParams'] = 1;
+        return $params;
+    }
 
     function checkTransaction($pmconfigs, $order, $act)
     {
-      self::addError("checkTransaction");
-      self::addError($pmconfigs);
-      self::addError($act);
-      self::addError($_REQUEST);
-
-
-      if ($act == 'check_') {
-        return self::processCheckAction($pmconfigs, $_REQUEST);
-      } elseif ($act == 'fail_') {
-        return self::processFailAction($pmconfigs, $_REQUEST);
-      } elseif ($act == 'pay_') {
-        return self::processSuccessAction($pmconfigs, $_REQUEST);
-      } elseif ($act == 'refund_') {
-        return self::processrefundAction($pmconfigs, $_REQUEST);
-      } elseif ($act == 'confirm_') {
-        return self::processconfirmAction($pmconfigs, $_REQUEST);
-      }
-      else
-      {
-        $return = 1;
-        return array(2, "Status pending. Order ID ".$order->order_id, $transaction, $transactiondata);
-      }
-
-     // die();
-    } //ok
-
-    public function processCheckAction($pmconfigs, $request)     ///OK
-    {
-      self::addError('processCheckAction');
-      $order = self::get_order($request);
-      if (!$order):
-        json_encode(array("ERROR" => 'order empty'));
-        die();
-      endif;
-      $accesskey = trim($pmconfigs['secret_api']);
-      self::addError($order);
-      if (self::CheckHMac($accesskey)) {
-        if (self::isCorrectSum($request, $order)) {
-          $data['CODE'] = 0;
-          self::addError('CorrectSum');
-        } else {
-          $data['CODE'] = 11;
-          $errorMessage = 'Incorrect payment sum';
-
-          self::addError($errorMessage);
+        if ($act == 'check_') {
+            return self::processCheckAction($pmconfigs, $_REQUEST);
+        } elseif ($act == 'fail_') {
+            return self::processFailAction($pmconfigs, $_REQUEST);
+        } elseif ($act == 'pay_') {
+            return self::processSuccessAction($pmconfigs, $_REQUEST);
+        } elseif ($act == 'refund_') {
+            return self::processrefundAction($pmconfigs, $_REQUEST);
+        } elseif ($act == 'confirm_') {
+            return self::processconfirmAction($pmconfigs, $_REQUEST);
+        } elseif ($act == 'chancel_') {
+            return self::processCancelAction($pmconfigs, $_REQUEST);
+        }
+        else
+        {
+            $return = 1;
+            return array(2, "Status pending. Order ID ".$order->order_id, $transaction, $transactiondata);
         }
 
-        self::addError("Проверка заказа");
+    }
 
-        //if (self::isCorrectOrderID($order, $request)) {
-          $data['CODE'] = 0;
-       // } else {
-        //  $data['CODE'] = 10;
-        //  $errorMessage = 'Incorrect order ID';
-        //  self::addError($errorMessage);
-        //}
+    public function processCheckAction($pmconfigs, $request)
+    {
 
+        $order = self::get_order($request);
+        if (!$order):
+            json_encode(array("ERROR" => 'order empty'));
+            die();
+        endif;
+        $accesskey = trim($pmconfigs['secret_api']);
+        if (self::CheckHMac($accesskey)) {
+            if (self::isCorrectSum($request, $order)) {
+                $data['CODE'] = 0;
+        } else {
+            $data['CODE'] = 11;
+            $errorMessage = 'Incorrect payment sum';
+        }
+
+        $data['CODE'] = 0;
         $orderID = $request['InvoiceId'];
 
         if ($order['order_status'] == $pmconfigs['transaction_pay_status']):
@@ -279,10 +259,108 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
       die();
     }
 
-    private function processSuccessAction($pmconfigs,$request)       ///
+  private function changeProductQTYinStock($change = "-",$order_id){
+      $db = & JFactory::getDBO();
+      $dispatcher = JDispatcher::getInstance();
+
+      $query = "SELECT OI.*, P.unlimited FROM `#__jshopping_order_item` as OI left join `#__jshopping_products` as P on P.product_id=OI.product_id
+                  WHERE order_id = '".$db->escape($order_id)."'";
+      $db->setQuery($query);
+      $items = $db->loadObjectList();
+     // $dispatcher->trigger('onBeforechangeProductQTYinStock', array(&$items, &$this, &$change));
+
+      foreach($items as $item){
+
+        if ($item->unlimited) continue;
+
+        if ($item->attributes!=""){
+          $attributes = unserialize($item->attributes);
+        }else{
+          $attributes = array();
+        }
+        if (!is_array($attributes)) $attributes = array();
+
+        $allattribs = JSFactory::getAllAttributes(1);
+        $dependent_attr = array();
+        foreach($attributes as $k=>$v){
+          if ($allattribs[$k]->independent==0){
+            $dependent_attr[$k] = $v;
+          }
+        }
+
+        if (count($dependent_attr)){
+          $where="";
+          foreach($dependent_attr as $k=>$v){
+            $where.=" and `attr_".(int)$k."`=".intval($v);
+          }
+          $query = "update `#__jshopping_products_attr` set `count`=`count`  ".$change." ".$item->product_quantity." where product_id='".intval($item->product_id)."' ".$where;
+          $db->setQuery($query);
+          $db->query();
+
+          $query="select sum(count) as qty from `#__jshopping_products_attr` where product_id='".intval($item->product_id)."' and `count`>0 ";
+          $db->setQuery($query);
+          $qty = $db->loadResult();
+
+          $query = "UPDATE `#__jshopping_products` SET product_quantity = '".$qty."' WHERE product_id = '".intval($item->product_id)."'";
+          $db->setQuery($query);
+          $db->query();
+        }else{
+          $query = "UPDATE `#__jshopping_products` SET product_quantity = product_quantity ".$change." ".$item->product_quantity." WHERE product_id = '".intval($item->product_id)."'";
+          $db->setQuery($query);
+          $db->query();
+        }
+      //  $dispatcher->trigger('onAfterchangeProductQTYinStock', array(&$item, &$change, &$this));
+      }
+
+      if ($change=='-'){
+        $product_stock_removed = 1;
+      }else{
+        $product_stock_removed = 0;
+      }
+      $query = "update #__jshopping_orders set product_stock_removed=".$product_stock_removed." WHERE order_id = '".$db->escape($order_id)."'";
+      $db->setQuery($query);
+      $db->query();
+    //  $dispatcher->trigger('onAfterchangeProductQTYinStockPSR', array(&$items, &$this, &$change, &$product_stock_removed));
+    }
+
+
+    private function processSuccessAction($pmconfigs,$request)
     {
       $order = self::get_order($request);
       self::addError("---------processSuccessAction--------");
+      $data['CODE'] = 0;
+
+      $data2['order_id'] = $_REQUEST['InvoiceId'];
+      if ( $pmconfigs['payment_scheme'] == 'charge' ) {
+        $data2['status'] = $pmconfigs['transaction_pay_status'];
+      }
+      else {
+          $data2['status'] = $pmconfigs['transaction_auth_status'];
+      };
+      $data2['status_id'] = '';
+      $data2['sendmessage'] = 0;
+      $data2['notify'] = 0;
+      $data2['comments'] = '';
+      $data2['include'] = '';
+      $data2['view_order'] = 0;
+      self::updateStatus($data2);
+
+      $data3['order_id'] = $_REQUEST['InvoiceId'];
+      $data3['transaction'] = $_REQUEST['TransactionId'];
+      self::SetTransaction($data3);
+      self::changeProductQTYinStock("-",$data3['order_id']);
+     // self::SetTransactionId($order, $request['TransactionId']);
+      $checkout = JSFactory::getModel('checkout', 'jshop');
+      $checkout->sendOrderEmail($data2['order_id'], 0);
+
+      echo json_encode($data);
+      die();
+    }
+    
+    private function processconfirmAction($pmconfigs,$request)       ///
+    {
+      $order = self::get_order($request);
+      self::addError("---------processconfirmAction--------");
       $data['CODE'] = 0;
 
       $data2['order_id'] = $_REQUEST['InvoiceId'];
@@ -298,7 +376,11 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
       $data3['order_id'] = $_REQUEST['InvoiceId'];
       $data3['transaction'] = $_REQUEST['TransactionId'];
       self::SetTransaction($data3);
+      self::changeProductQTYinStock("-",$data3['order_id']);
      // self::SetTransactionId($order, $request['TransactionId']);
+      $checkout = JSFactory::getModel('checkout', 'jshop');
+      $checkout->sendOrderEmail($data2['order_id'], 0);
+
 
       self::addError('PAY_COMPLETE');
       self::addError('----------data============');
@@ -325,7 +407,7 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
       return $result;
     }
 
-    private function processRefundAction($pmconfigs, $request)
+    private function processrefundAction($pmconfigs, $request)
     {
       $data2['order_id'] = $_REQUEST['InvoiceId'];
       $data2['status'] = $pmconfigs['transaction_refund_status'];
@@ -344,7 +426,7 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
     private function processCancelAction($pmconfigs, $request)
     {
       $data2['order_id'] = $_REQUEST['InvoiceId'];
-      $data2['status'] = $pmconfigs['transaction_refund_status'];
+      $data2['status'] = 3;
       $data2['status_id'] = '';
       $data2['sendmessage'] = 0;
       $data2['notify'] = 0;
@@ -418,16 +500,16 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
       self::addError("finish_order");
       $db = JFactory::getDbo();
 
-      // Получаем объект запроса
+      // РџРѕР»СѓС‡Р°РµРј РѕР±СЉРµРєС‚ Р·Р°РїСЂРѕСЃР°
       $query = $db->getQuery(true);
 
-      // Поля для обновления
+      // РџРѕР»СЏ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ
       $fields = array(
         $db->quoteName('order_created') . ' = 1',
         $db->quoteName('product_stock_removed') . ' = 1',
       );
 
-      // Условия обновления
+      // РЈСЃР»РѕРІРёСЏ РѕР±РЅРѕРІР»РµРЅРёСЏ
       $conditions = array(
         $db->quoteName('order_id') . ' = '.$order_id
       );
@@ -436,7 +518,7 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
         ->set($fields)
         ->where($conditions);
 
-      // Устанавливаем и выполняем запрос
+      // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј Рё РІС‹РїРѕР»РЅСЏРµРј Р·Р°РїСЂРѕСЃ
       $db->setQuery($query)
         ->execute();
     }
@@ -568,10 +650,10 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
 
     function addError($str)
     {
-      $file = $_SERVER['DOCUMENT_ROOT'] . '/log_cloud1.txt';
-      $current = file_get_contents($file);
-      $current .= print_r($str, 1) . "\n";
-      file_put_contents($file, $current);
+      //$file = $_SERVER['DOCUMENT_ROOT'] . '/log_cloud1.txt';
+      //$current = file_get_contents($file);
+      //$current .= print_r($str, 1) . "\n";
+      //file_put_contents($file, $current);
     }
 
     function SetTransaction($data)
@@ -579,15 +661,15 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
       self::addError("finish_order");
       $db = JFactory::getDbo();
 
-      // Получаем объект запроса
+      // РџРѕР»СѓС‡Р°РµРј РѕР±СЉРµРєС‚ Р·Р°РїСЂРѕСЃР°
       $query = $db->getQuery(true);
 
-      // Поля для обновления
+      // РџРѕР»СЏ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ
       $fields = array(
         $db->quoteName('transaction') . ' = '.$data['transaction'],
       );
 
-      // Условия обновления
+      // РЈСЃР»РѕРІРёСЏ РѕР±РЅРѕРІР»РµРЅРёСЏ
       $conditions = array(
         $db->quoteName('order_id') . ' = '.$data['order_id']
       );
@@ -596,7 +678,7 @@ $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . "
         ->set($fields)
         ->where($conditions);
 
-      // Устанавливаем и выполняем запрос
+      // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј Рё РІС‹РїРѕР»РЅСЏРµРј Р·Р°РїСЂРѕСЃ
       $db->setQuery($query)
         ->execute();
     }
