@@ -204,7 +204,7 @@
             return self::processrefundAction($pmconfigs, $_REQUEST);
         } elseif ($act == 'confirm_') {
             return self::processconfirmAction($pmconfigs, $_REQUEST);
-        } elseif ($act == 'chancel_') {
+        } elseif ($act == 'cancel_') {
             return self::processCancelAction($pmconfigs, $_REQUEST);
         }
         else

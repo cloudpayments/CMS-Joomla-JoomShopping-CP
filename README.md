@@ -79,7 +79,7 @@ _Согласно ФЗ-54 владельцы онлайн-касс должны 
 * **Confirm уведомление**: \
 `http://domain.ru/index.php?option=com_jshopping&controller=checkout&task=step7&act=confirm_&js_paymentclass=pm_cloudpayments_cp&no_lang=1`
 * **Cancel уведомление**: \
-`http://domain.ru/index.php?option=com_jshopping&controller=checkout&task=step7&act=chancel_&js_paymentclass=pm_cloudpayments_cp&no_lang=1`
+`http://domain.ru/index.php?option=com_jshopping&controller=checkout&task=step7&act=cancel_&js_paymentclass=pm_cloudpayments_cp&no_lang=1`
 
 Где domain.ru — доменное имя вашего сайта. Кодировка — UTF-8, HTTP-метод — POST, формат — CloudPayments.
 

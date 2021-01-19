@@ -195,7 +195,7 @@
          </tr>
          <tr>
             <td class = "key">
-              <?php echo STATUS_CHANCEL; ?>
+              <?php echo STATUS_CANCEL; ?>
             </td>
             <td>
               <?php

@@ -65,7 +65,7 @@ define("DELIVERY_VAT4", "расчетный НДС 10/110");
 define("DELIVERY_VAT5", "расчетный НДС 20/120");
 define("STATUS_GROUP", "Статусы");
 define("STATUS_PAY", "Статус оплаченного заказа");
-define("STATUS_CHANCEL", "Статус возврата платежа");
+define("STATUS_CANCEL", "Статус возврата платежа");
 define("STATUS_AUTHORIZE", "Статус подтверждения авторизации платежа (двухстадийные платежи)");
 define("STATUS_AU", "Статус авторизованного платежа (двухстадийные платежи)");
 define("STATUS_DELIVERED", "Статус доставки");

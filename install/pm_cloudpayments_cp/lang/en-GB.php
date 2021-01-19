@@ -64,7 +64,7 @@ define("DELIVERY_VAT4", "settlement VAT 10/110");
 define("DELIVERY_VAT5", "settlement VAT 20/120");
 define("STATUS_GROUP", "Statuses");
 define("STATUS_PAY", "Status paid");
-define("STATUS_CHANCEL", "Payment refund status");
+define("STATUS_CANCEL", "Payment refund status");
 define("STATUS_AUTHORIZE", "Status of confirmation of authorization of payment (two-stage payments)");
 define("STATUS_AU", "Status of authorized payment (two-step payments)");
 define("STATUS_DELIVERED", "Status of delivered");
