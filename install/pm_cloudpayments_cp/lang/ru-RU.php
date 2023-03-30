@@ -50,6 +50,7 @@ define("SALE_HPS_WIDGET_LANG_TYPE_6", "Украинский EET");
 define("SALE_HPS_WIDGET_LANG_TYPE_7", "Польский CET");
 define("SALE_HPS_WIDGET_LANG_TYPE_8", "Португальский CET");
 define("SALE_HPS_WIDGET_LANG_TYPE_9", "Чешский CET");
+define("SALE_HPS_WIDGET_LANG_TYPE_10", "Узбекский UZT");
 define("SALE_HPS_WIDGET_SKIN_TYPE_0", "classic");
 define("SALE_HPS_WIDGET_SKIN_TYPE_1", "modern");
 define("SALE_HPS_WIDGET_SKIN_TYPE_2", "mini");
@@ -105,3 +106,5 @@ define("SALE_HPS_CLOUDPAYMENT_SHOP_AUTH_DESC", " При авторизации �
 define("SALE_HPS_CLOUDPAYMENT_SHOP_PAY_DESC", " При оплате заказа статус меняется на");
 define("SALE_HPS_CLOUDPAYMENT_SHOP_REFUND_DESC", "При возврате платежа статус меняется на");
 define("SALE_HPS_CLOUDPAYMENT_SHOP_DELIVERED_DESC", " Отдельный статус доставки необходим при формировании двух чеков: один чек - при поступлении денег от покупателя, второй при отгрузке товара. Отправка второго чека возможна при следующих способах расчета: Предоплата, Предоплата 100%, Аванс'");
+define("SALE_HPS_CLOUDPAYMENT_SHIPPING_SPIC", "Код доставки ИКПУ");
+define("SALE_HPS_CLOUDPAYMENT_PACKAGE_CODE", "Код упаковки доставки");

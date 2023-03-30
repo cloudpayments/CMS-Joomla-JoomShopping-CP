@@ -19,6 +19,7 @@
         $params['PAYMENT_BUYER_PHONE'] = $order->phone;
         $order->order_total = self::fixOrderTotal($order);
         $params['sum'] = $order->order_total;
+        $AdditionalReceiptInfos = false;
 
         if (!empty($params['checksend'])):
             $OrderItems = self::getOrderItems($order->order_id);
@@ -33,7 +34,7 @@
                     else {
                         $amount = number_format(floatval($item['product_item_price'] * $item['product_quantity']), 2, ".", '');
                     }
-                    $items[] = array(
+                  $cp_item = array(
                         //'label' => iconv("utf-8","cp1251",$item['product_name']),
                         'label' => $item['product_name'],
                         'price' => number_format($item['product_item_price'], 2, ".", ''),
@@ -43,10 +44,37 @@
                         'method'   => (int)$params['kassa_method'],
                         'object'   => (int)$params['kassa_object'],
                     );
+
+                  if (!function_exists('str_contains')) {
+                    function str_contains($haystack, $needle) {
+                      return $needle !== '' && mb_strpos($haystack, $needle) !== false;
+                    }
+                  }
+
+                  if(key_exists('product_attributes', $item)) {
+                    $product_attributes = explode(PHP_EOL, trim($item['product_attributes']));
+
+                    $spic = array_filter($product_attributes, function ($prod_attr) {
+                      return str_contains($prod_attr, 'CodeIKPU');
+                    });
+
+                    $packageCode = array_filter($product_attributes, function ($prod_attr) {
+                      return str_contains($prod_attr, 'PackageCode');
+                    });
+
+                    if(count($spic) && count($packageCode)) {
+                      $cp_item['spic'] = explode(" ", array_shift($spic))[1];
+                      $cp_item['packageCode'] = explode(" ", array_shift($packageCode))[1];
+
+                      if(!$AdditionalReceiptInfos) $AdditionalReceiptInfos = true;
+                    }
+                  }
+
+                  $items[] = $cp_item;
                 endforeach;
 
                 if ($order->order_shipping && $order->order_shipping > 0):
-                    $items[] = array(
+                  $cp_item = array(
                         //'label' => iconv("utf-8","cp1251","Доставка"),
                         'label' => "Доставка",
                         'price' => number_format($order->order_shipping, 2, ".", ''),
@@ -56,6 +84,13 @@
                         'method'   => (int)$params['kassa_method'],
                         'object'   => 4,
                     );
+
+                  if($params['spic'] && $params['package_code']) {
+                    $cp_item['spic'] = $params['spic'];
+                    $cp_item['packageCode'] = $params['package_code'];
+                  }
+
+                  $items[] = $cp_item;
                 endif;
 
                 if ($order->order_payment && $order->order_payment > 0):

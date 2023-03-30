@@ -31,6 +31,7 @@
   $lang_list[] = JHTML::_('select.option', 'pl',SALE_HPS_WIDGET_LANG_TYPE_7, 'id', 'name');
   $lang_list[] = JHTML::_('select.option', 'pt',SALE_HPS_WIDGET_LANG_TYPE_8, 'id', 'name');
   $lang_list[] = JHTML::_('select.option', 'cs-CZ',SALE_HPS_WIDGET_LANG_TYPE_9, 'id', 'name');
+  $lang_list[] = JHTML::_('select.option', 'uz', SALE_HPS_WIDGET_LANG_TYPE_10, 'id', 'name');
   
   $skin_list = array();
   $skin_list[] = JHTML::_('select.option', 'classic',SALE_HPS_WIDGET_SKIN_TYPE_0, 'id', 'name');
@@ -357,6 +358,25 @@
               ?>
             </td>
          </tr>
+          <tr>
+              <td class="key">
+                <?php echo SALE_HPS_CLOUDPAYMENT_SHIPPING_SPIC; ?>
+              </td>
+              <td>
+                  <input type="text" class="inputbox" name="pm_params[spic]" size="45"
+                         value="<?php if (isset($params['spic'])) echo $params['spic'] ?>"/>
+              </td>
+          </tr>
+
+          <tr>
+              <td class="key">
+                <?php echo SALE_HPS_CLOUDPAYMENT_PACKAGE_CODE; ?>
+              </td>
+              <td>
+                  <input type="text" class="inputbox" name="pm_params[package_code]" size="45"
+                         value="<?php if (isset($params['package_code'])) echo $params['package_code'] ?>"/>
+              </td>
+          </tr>
       </table>
    </fieldset>
 </div>

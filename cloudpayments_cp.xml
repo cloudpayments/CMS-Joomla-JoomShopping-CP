@@ -7,7 +7,7 @@
         <license>Информация о лицензии</license>
         <authorEmail></authorEmail>
         <authorUrl></authorUrl>
-        <version>1.1.1</version>
+        <version>1.1.2</version>
         <description>PLG_jshoppingadmin_cloudpayments_cp_XML_DESCRIPTION</description>
         <scriptfile>install.php</scriptfile>
         <files><filename plugin="cloudpayments_cp">cloudpayments_cp.php</filename>
