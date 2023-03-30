@@ -125,6 +125,7 @@
                 $data['cloudPayments']['customerReceipt']['email'] = $params['PAYMENT_BUYER_EMAIL'];
                 $data['cloudPayments']['customerReceipt']['phone'] = $params['PAYMENT_BUYER_PHONE'];
                 $data['cloudPayments']['customerReceipt']['amounts']['electronic'] = number_format($params['sum'], 2, '.', '');
+                if ($AdditionalReceiptInfos) $data['cloudPayments']['customerReceipt']['AdditionalReceiptInfos'] = ["Вы стали обладателем права на 1% cashback"]; // Это статичное значение
             endif;
         endif;
         
