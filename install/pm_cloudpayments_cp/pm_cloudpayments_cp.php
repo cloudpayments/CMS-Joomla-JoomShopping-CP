@@ -54,19 +54,9 @@
                   if(key_exists('product_attributes', $item)) {
                     $product_attributes = explode(PHP_EOL, trim($item['product_attributes']));
 
-                    $spic = array_filter($product_attributes, function ($prod_attr) {
-                      return str_contains($prod_attr, 'CodeIKPU');
-                    });
-
-                    $packageCode = array_filter($product_attributes, function ($prod_attr) {
-                      return str_contains($prod_attr, 'PackageCode');
-                    });
-
-                    if(count($spic) && count($packageCode)) {
-                      $cp_item['spic'] = explode(" ", array_shift($spic))[1];
-                      $cp_item['packageCode'] = explode(" ", array_shift($packageCode))[1];
-
-                      if(!$AdditionalReceiptInfos) $AdditionalReceiptInfos = true;
+                    foreach ($product_attributes as $attribute) {
+                      if (str_contains($attribute, 'CodeIKPU')) $cp_item['spic'] = explode(" ", $attribute)[1];
+                      if (str_contains($attribute, 'PackageCode')) $cp_item['packageCode'] = explode(" ", $attribute)[1];
                     }
                   }
 
@@ -85,9 +75,11 @@
                         'object'   => 4,
                     );
 
-                  if($params['spic'] && $params['package_code']) {
+                  if(!empty($params['spic']) && !empty($params['package_code'])) {
                     $cp_item['spic'] = $params['spic'];
                     $cp_item['packageCode'] = $params['package_code'];
+
+                    $data['cloudPayments']['customerReceipt']['AdditionalReceiptInfos'] = ["Вы стали обладателем права на 1% cashback"]; // Это статичное значение
                   }
 
                   $items[] = $cp_item;
@@ -125,7 +117,6 @@
                 $data['cloudPayments']['customerReceipt']['email'] = $params['PAYMENT_BUYER_EMAIL'];
                 $data['cloudPayments']['customerReceipt']['phone'] = $params['PAYMENT_BUYER_PHONE'];
                 $data['cloudPayments']['customerReceipt']['amounts']['electronic'] = number_format($params['sum'], 2, '.', '');
-                if ($AdditionalReceiptInfos) $data['cloudPayments']['customerReceipt']['AdditionalReceiptInfos'] = ["Вы стали обладателем права на 1% cashback"]; // Это статичное значение
             endif;
         endif;
         
