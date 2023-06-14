@@ -122,9 +122,16 @@
         
         //$descr = iconv("utf-8","cp1251","заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . " от " . date("d-m-y h:i:s"));
         $descr = "заказ № " . $params['PAYMENT_ID'] . " на " . $_SERVER["HTTP_HOST"] . " от " . date("d-m-y h:i:s");
+        $ch = curl_init('https://api.cloudpayments.ru/merchant/configuration/'.$params["publicId"]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        $client = json_decode(curl_exec($ch));
+        curl_close($ch);
+        $widgetUrl = $client->Model->WidgetUrl ?? 'https://widget.cloudpayments.ru/';
 
         $output = '<script src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>    
-                <script src="https://widget.cloudpayments.ru/bundles/cloudpayments?cms=Joomshoping"></script>
+                <script src="'.$widgetUrl.'bundles/cloudpayments?cms=Joomshoping"></script>
                 <button class="cloudpay_button" id="payButton">Pay</button>
                 <div id="result" style="display:none"></div>
                 <script type="text/javascript">
